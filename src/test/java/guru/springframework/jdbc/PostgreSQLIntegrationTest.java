@@ -13,15 +13,15 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ActiveProfiles("local")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class MySQLIntegrationTest {
+class PostgreSQLIntegrationTest {
 
     @Autowired
     BookRepository bookRepository;
 
     @Test
-    void testMySQL() {
+    void testPostgreSQL() {
         long countBefore = bookRepository.count();
-        assertThat(countBefore).isGreaterThan(0);
+        assertThat(countBefore).isPositive();
     }
 
 }
