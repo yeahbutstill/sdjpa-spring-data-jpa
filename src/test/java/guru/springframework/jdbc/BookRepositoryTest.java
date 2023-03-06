@@ -28,6 +28,12 @@ class BookRepositoryTest {
     BookRepository bookRepository;
 
     @Test
+    void testBookJpaNamed() {
+        Book book = bookRepository.jpaNamed("Clean Code");
+        assertThat(book).isNotNull();
+    }
+
+    @Test
     void testBookQueryNative() {
         Book book = bookRepository.findBookByTitleNativeQuery("Clean Code");
         assertThat(book).isNotNull();
@@ -54,9 +60,6 @@ class BookRepositoryTest {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-
-
-
     }
 
     @Test
