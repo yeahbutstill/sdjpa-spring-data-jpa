@@ -2,7 +2,6 @@ package guru.springframework.jdbc;
 
 import guru.springframework.jdbc.domain.Book;
 import guru.springframework.jdbc.repositories.BookRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -10,6 +9,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 @ActiveProfiles("local")
 @DataJpaTest
@@ -21,20 +28,44 @@ class BookRepositoryTest {
     BookRepository bookRepository;
 
     @Test
+    void testBookFuture() {
+        Future<Book> bookFuture = bookRepository.queryByTitle("Clean Code");
+        try {
+            Book book = bookFuture.get();
+            assertNotNull(book);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+    }
+
+    @Test
+    void testBookStream() {
+        AtomicInteger count = new AtomicInteger();
+        bookRepository.findAllByTitleNotNull().forEach(book -> {
+            count.incrementAndGet();
+        });
+
+        assertThat(count.get()).isGreaterThan(4);
+    }
+
+    @Test
     void testEmptyResultException() {
-        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> {
+        assertThrows(EmptyResultDataAccessException.class, () -> {
             Book book = bookRepository.readByTitle("foobar4");
         });
     }
 
     @Test
     void testNullParam() {
-        Assertions.assertNull(bookRepository.getByTitle(null));
+        assertNull(bookRepository.getByTitle(null));
     }
 
     @Test
     void testNoException() {
-        Assertions.assertNull(bookRepository.getByTitle("foo"));
+        assertNull(bookRepository.getByTitle("foo"));
     }
 
 }
