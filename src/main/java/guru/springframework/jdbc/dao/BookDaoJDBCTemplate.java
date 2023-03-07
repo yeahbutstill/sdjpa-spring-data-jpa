@@ -1,6 +1,8 @@
 package guru.springframework.jdbc.dao;
 
 import guru.springframework.jdbc.domain.Book;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,10 +14,22 @@ import java.util.List;
 public class BookDaoJDBCTemplate implements BookDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private static Logger logger = LoggerFactory.getLogger(BookDaoJDBCTemplate.class);
 
     @Autowired
     public BookDaoJDBCTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public List<Book> findAllBooksSortByTitle(Pageable pageable) {
+        String sql = "SELECT * FROM book ORDER BY title "
+                + pageable.getSort().getOrderFor("title").getDirection().name()
+                + " LIMIT ? OFFSET ?";
+
+        logger.info("SQL = {}", sql);
+
+        return jdbcTemplate.query(sql, getBookMapper(), pageable.getPageSize(), pageable.getOffset());
     }
 
     @Override
