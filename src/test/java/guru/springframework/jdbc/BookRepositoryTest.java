@@ -9,6 +9,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -22,10 +27,30 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @ComponentScan(basePackages = {"guru.springframework.jdbc.dao"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Testcontainers
 class BookRepositoryTest {
 
+    @Container
+    public static PostgreSQLContainer<?> pgsql = new PostgreSQLContainer<>("postgres:14");
+
+    @DynamicPropertySource
+    static void configureTestContainersProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", pgsql::getJdbcUrl);
+        registry.add("spring.datasource.username", pgsql::getUsername);
+        registry.add("spring.datasource.password", pgsql::getPassword);
+    }
+
     @Autowired
-    BookRepository bookRepository;
+    public BookRepository bookRepository;
+
+    @Test
+    void contextLoads() throws Exception {
+
+        var testContainer = bookRepository.save(new Book("Test container", "202320232023", "Self"));
+        var all = bookRepository.findAll();
+        assertTrue( all.iterator().hasNext() ,  () -> "there should be some data" );
+
+    }
 
     @Test
     void testBookJpaNamed() {

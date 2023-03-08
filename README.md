@@ -14,7 +14,7 @@ This repository contains source code examples to support my course Spring Data J
 docker run --rm \
 --name book-db2 \
 -e POSTGRES_DB=bookdb2 \
--e POSTGRES_USER=sdjpa \
+-e POSTGRES_USER=bookadmin \
 -e POSTGRES_PASSWORD=PNSJkxXvVNDAhePMuExTBuRR \
 -e PGDATA=/var/lib/postgresql/data/pgdata \
 -v "$PWD/bookdb2-data:/var/lib/postgresql/data" \
@@ -25,7 +25,7 @@ postgres:14
 
 ## Login PostgreSQL
 ```shell
-psql -h 127.0.0.1 -U sdjpa bookdb2
+psql -h 127.0.0.1 -U bookadmin bookdb2
 ```
 
 ## Create User

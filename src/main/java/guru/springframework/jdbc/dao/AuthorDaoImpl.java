@@ -5,7 +5,10 @@ import guru.springframework.jdbc.repositories.AuthorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class AuthorDaoImpl implements AuthorDao {
@@ -45,5 +48,10 @@ public class AuthorDaoImpl implements AuthorDao {
     @Override
     public void deleteAuthorById(Long id) {
         authorRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Author> findAllAuthorsByLastName(String lastname, Pageable pageable) {
+        return null;
     }
 }
