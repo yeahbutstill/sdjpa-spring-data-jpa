@@ -32,6 +32,7 @@ class BookDaoImplSpringDataJPATest {
 
     @Container
     public static PostgreSQLContainer<?> pgsql = new PostgreSQLContainer<>("postgres:14");
+
     @Qualifier("bookDaoImpl")
     @Autowired
     BookDao bookDao;
