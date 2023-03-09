@@ -1,7 +1,5 @@
-package guru.springframework.jdbc;
+package guru.springframework.jdbc.dao;
 
-import guru.springframework.jdbc.dao.BookDao;
-import guru.springframework.jdbc.dao.BookDaoJDBCTemplate;
 import guru.springframework.jdbc.domain.Book;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
@@ -25,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ComponentScan(basePackages = {"guru.springframework.jdbc.dao"})
+@Testcontainers
 class BookDaoJDBCTemplateTest {
 
     @Autowired

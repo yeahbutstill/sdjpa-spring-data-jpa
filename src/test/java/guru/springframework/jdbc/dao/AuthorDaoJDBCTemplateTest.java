@@ -1,9 +1,8 @@
-package guru.springframework.jdbc;
+package guru.springframework.jdbc.dao;
 
 import guru.springframework.jdbc.dao.AuthorDao;
-import guru.springframework.jdbc.dao.AuthorDaoHibernate;
+import guru.springframework.jdbc.dao.AuthorDaoJDBCTemplate;
 import guru.springframework.jdbc.domain.Author;
-import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -24,31 +24,18 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @ActiveProfiles("local")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ComponentScan(basePackages = {"guru.springframework.jdbc.dao"})
 @Testcontainers
-class AuthorDaoHibernateTest {
-
-    @Autowired
-    EntityManagerFactory entityManagerFactory;
-
-    @Qualifier("authorDaoHibernate")
-    @Autowired
-    AuthorDao authorDao;
-
-    @BeforeEach
-    void setUp() {
-        authorDao = new AuthorDaoHibernate(entityManagerFactory);
-    }
+class AuthorDaoJDBCTemplateTest {
 
     @Container
     public static PostgreSQLContainer<?> pgsql = new PostgreSQLContainer<>("postgres:14");
 
     @DynamicPropertySource
-    static void configureTestContainerProperties(DynamicPropertyRegistry registry) {
+    static void configureTestContainersProperties(DynamicPropertyRegistry registry) {
 
         registry.add("spring.datasource.url", pgsql::getJdbcUrl);
         registry.add("spring.datasource.username", pgsql::getUsername);
@@ -56,40 +43,60 @@ class AuthorDaoHibernateTest {
 
     }
 
-    @Test
-    void findAllAuthorsByLastName() {
-        List<Author> authors = authorDao.findAllAuthorsByLastName("Smith", PageRequest.of(0, 10));
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
-        assertThat(authors).isNotNull();
-        assertThat(authors).hasSize(10);
+    @Qualifier("authorDaoJDBCTemplate")
+    @Autowired
+    AuthorDao authorDao;
+
+    @BeforeEach
+    void setup() {
+        authorDao = new AuthorDaoJDBCTemplate(jdbcTemplate);
     }
 
     @Test
-    void findAllAuthorsByLastNameSortLastNameDesc() {
-        List<Author> authors = authorDao.findAllAuthorsByLastName("Smith",
+    void testFindAllAuthorByLastName() {
+
+        List<Author> smith = authorDao.findAllAuthorsByLastName("Smith", PageRequest.of(0, 10));
+
+        assertThat(smith).isNotNull();
+        assertThat(smith.size()).isEqualTo(10);
+
+    }
+
+    @Test
+    void testFindAllAuthorByLastNameSortLastNameDesc() {
+
+        List<Author> smith = authorDao.findAllAuthorsByLastName("Smith",
                 PageRequest.of(0, 10, Sort.by(Sort.Order.desc("firstname"))));
 
-        assertThat(authors).isNotNull();
-        assertThat(authors).hasSize(10);
-        assertThat(authors.get(0).getFirstName()).isEqualTo("Yugal");
+        assertThat(smith).isNotNull();
+        assertThat(smith.size()).isEqualTo(10);
+        assertThat(smith.get(0).getFirstName()).isEqualTo("Yugal");
+
     }
 
     @Test
-    void findAllAuthorsByLastNameSortLastNameAsc() {
-        List<Author> authors = authorDao.findAllAuthorsByLastName("Smith",
+    void testFindAllAuthorByLastNameSortLastNameAsc() {
+
+        List<Author> smith = authorDao.findAllAuthorsByLastName("Smith",
                 PageRequest.of(0, 10, Sort.by(Sort.Order.asc("firstname"))));
 
-        assertThat(authors).isNotNull();
-        assertThat(authors).hasSize(10);
-        assertThat(authors.get(0).getFirstName()).isEqualTo("Ahmed");
+        assertThat(smith).isNotNull();
+        assertThat(smith.size()).isEqualTo(10);
+        assertThat(smith.get(0).getFirstName()).isEqualTo("Ahmed");
+
     }
 
     @Test
-    void findAllAuthorsByLastNameAllRecs() {
-        List<Author> authors = authorDao.findAllAuthorsByLastName("Smith", PageRequest.of(0, 100));
+    void testFindAllAuthorByLastNameSortLastNameResc() {
 
-        assertThat(authors).isNotNull();
-        assertThat(authors).hasSize(40);
+        List<Author> smith = authorDao.findAllAuthorsByLastName("Smith", PageRequest.of(0, 100));
+
+        assertThat(smith).isNotNull();
+        assertThat(smith.size()).isEqualTo(40);
+
     }
 
 }

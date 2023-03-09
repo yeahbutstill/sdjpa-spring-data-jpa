@@ -1,4 +1,4 @@
-package guru.springframework.jdbc;
+package guru.springframework.jdbc.dao;
 
 import guru.springframework.jdbc.dao.BookDao;
 import guru.springframework.jdbc.dao.BookDaoHibernate;
