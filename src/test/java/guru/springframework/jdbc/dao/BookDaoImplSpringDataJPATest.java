@@ -1,6 +1,7 @@
 package guru.springframework.jdbc.dao;
 
 import guru.springframework.jdbc.domain.Book;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("local")
@@ -29,12 +30,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Testcontainers
 class BookDaoImplSpringDataJPATest {
 
+    @Container
+    public static PostgreSQLContainer<?> pgsql = new PostgreSQLContainer<>("postgres:14");
     @Qualifier("bookDaoImpl")
     @Autowired
     BookDao bookDao;
-
-    @Container
-    public static PostgreSQLContainer<?> pgsql = new PostgreSQLContainer<>("postgres:14");
 
     @DynamicPropertySource
     static void configureTestContainerProperties(DynamicPropertyRegistry registry) {
@@ -46,75 +46,82 @@ class BookDaoImplSpringDataJPATest {
     }
 
     @Test
-    void testSortByTitle() {
+    void findAllBooksPage1_SortByTitle() {
         List<Book> books = bookDao.findAllBooksSortByTitle(PageRequest.of(0, 10,
                 Sort.by(Sort.Order.desc("title"))));
-        assertThat(books).isNotNull();
-        assertThat(books.size()).isEqualTo(10);
+
+        AssertionsForClassTypes.assertThat(books).isNotNull();
+        assertThat(books).hasSize(10);
     }
 
     @Test
-    void testFindAllBooksPageable1() {
+    void findAllBooksPage1_pageable() {
         List<Book> books = bookDao.findAllBooks(PageRequest.of(0, 10));
-        assertThat(books).isNotNull();
-        assertThat(books.size()).isEqualTo(10);
+
+        AssertionsForClassTypes.assertThat(books).isNotNull();
+        assertThat(books).hasSize(10);
     }
 
     @Test
-    void testFindAllBooksPageable2() {
+    void findAllBooksPage2_pageable() {
         List<Book> books = bookDao.findAllBooks(PageRequest.of(1, 10));
-        assertThat(books).isNotNull();
-        assertThat(books.size()).isEqualTo(0);
+
+        AssertionsForClassTypes.assertThat(books).isNotNull();
+        assertThat(books).isEmpty();
     }
 
     @Test
-    void testFindAllBooksPageable10() {
+    void findAllBooksPage10_pageable() {
         List<Book> books = bookDao.findAllBooks(PageRequest.of(10, 10));
-        assertThat(books).isNotNull();
-        assertThat(books.size()).isEqualTo(0);
+
+        AssertionsForClassTypes.assertThat(books).isNotNull();
+        assertThat(books).isEmpty();
     }
 
     @Test
-    void testFindAllBooksPage1() {
+    void findAllBooksPage1() {
         List<Book> books = bookDao.findAllBooks(10, 0);
-        assertThat(books).isNotNull();
-        assertThat(books.size()).isEqualTo(10);
+
+        AssertionsForClassTypes.assertThat(books).isNotNull();
+        assertThat(books).hasSize(10);
     }
 
     @Test
-    void testFindAllBooksPage2() {
-        List<Book> books = bookDao.findAllBooks(10, 4);
-        assertThat(books).isNotNull();
-        assertThat(books.size()).isEqualTo(8);
+    void findAllBooksPage2() {
+        List<Book> books = bookDao.findAllBooks(10, 10);
+
+        AssertionsForClassTypes.assertThat(books).isNotNull();
+        assertThat(books).isEmpty();
     }
 
     @Test
-    void testFindAllBooksPage10() {
+    void findAllBooksPage10() {
         List<Book> books = bookDao.findAllBooks(10, 100);
-        assertThat(books).isNotNull();
-        assertThat(books.size()).isEqualTo(0);
+
+        AssertionsForClassTypes.assertThat(books).isNotNull();
+        assertThat(books).isEmpty();
     }
 
-
     @Test
-    void testfindAllBooks() {
+    void testFindAllBooks() {
         List<Book> books = bookDao.findAllBooks();
-        assertThat(books).isNotNull();
-        assertThat(books.size()).isGreaterThan(4);
+
+        AssertionsForClassTypes.assertThat(books).isNotNull();
+        assertThat(books).hasSizeGreaterThan(5);
     }
 
     @Test
     void getById() {
         Book book = bookDao.getById(3L);
 
-        assertThat(book.getId()).isNotNull();
+        AssertionsForClassTypes.assertThat(book.getId()).isNotNull();
     }
 
     @Test
     void findBookByTitle() {
         Book book = bookDao.findBookByTitle("Clean Code");
 
-        assertThat(book).isNotNull();
+        AssertionsForClassTypes.assertThat(book).isNotNull();
     }
 
     @Test
@@ -127,13 +134,12 @@ class BookDaoImplSpringDataJPATest {
 
         Book saved = bookDao.saveNewBook(book);
 
-        assertThat(saved).isNotNull();
+        AssertionsForClassTypes.assertThat(saved).isNotNull();
     }
 
     @Test
     void updateBook() {
         Book book = new Book();
-        book.setId(1L);
         book.setIsbn("1234");
         book.setPublisher("Self");
         book.setTitle("my book");
@@ -145,7 +151,7 @@ class BookDaoImplSpringDataJPATest {
 
         Book fetched = bookDao.getById(saved.getId());
 
-        assertThat(fetched.getTitle()).isEqualTo("New Book");
+        AssertionsForClassTypes.assertThat(fetched.getTitle()).isEqualTo("New Book");
     }
 
     @Test
